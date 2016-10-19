@@ -1,0 +1,332 @@
+<!doctype html>
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+	<link type="text/css" rel="stylesheet" href="css/user.css" media="screen,projection" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<style>
+		#viewer {
+			position: relative;
+		}
+
+		body,
+		html {
+			font-family: 'Abel', sans-serif;
+			color: #846C63;
+			background-color: #F6F4F1!important;
+		}
+
+		.btn,
+		.btn-large,
+		.btn-small {
+			background-color: #86A8A8!important;
+			color: white !important;
+			margin: 0;
+		}
+
+		[type="radio"]:checked+label:after {
+			border: 2px solid #86A8A8!important;
+			background-color: #86A8A8!important;
+		}
+
+		[type="checkbox"]:checked+label:before {
+			border-right: 2px solid #86A8A8!important;
+			border-bottom: 2px solid #86A8A8!important;
+		}
+
+		.btn-small {
+			padding: 0.25em;
+		}
+
+		.btn-thin {
+			padding-left: 0.2em;
+			padding-right: 0.2em;
+		}
+
+		green {
+			color: #86A8A8!important;
+		}
+
+		.input-field label {
+			top: 0;
+		}
+
+		#colormap {
+			/*border: 1px solid #846C63;*/
+			/*background-color: #846c63;*/
+			height: 229px;
+			width: 100%;
+		}
+
+		.no-bottom {
+			margin-bottom: 0;
+		}
+	</style>
+</head>
+
+<body>
+	<main class="container" style="width:85%">
+		<div class="row">
+			<!-- left area -->
+			<div class="col s12 m12 l8" id="canv_area">
+				<div class="card-panel" style="padding:0;line-height:0;position:relative;">
+					<div id="viewer"></div>
+				</div>
+				<div id="file_loader" class="row">
+					<div class="col s12">
+						<form action="#">
+							<div class="file-field input-field">
+								<div class="btn">
+									<input id="file_path" type="file">
+									<span><i class="material-icons">perm_media</i></span>
+								</div>
+								<div class="file-path-wrapper">
+									<input class="file-path validate" type="text" placeholder="UPLOAD (*.off | *.obj) MODEL FILE">
+								</div>
+
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<!-- right panel -->
+			<div class="col s12 m12 l4">
+				<div class="card-panel" style="position:relative;">
+					<div id="panel1" class="row">
+						<div class="col s10 m6 l12">
+							<div id="mesh_info" class=""></div>
+							<div class="row">
+								<div class="input-field col s12">
+									<h5>VIEW</h5>
+									<form action="#">
+										<p>
+											<input type="checkbox" id="form_wireframe" />
+											<label for="form_wireframe">Wireframe</label>
+										</p>
+										<p>
+											<input type="checkbox" id="form_mesh" checked="checked" />
+											<label for="form_mesh">Mesh</label>
+										</p>
+										<p>
+											<input name="group1" type="radio" id="form_flat" />
+											<label for="form_flat">Flat</label>
+										</p>
+										<p>
+											<input name="group1" type="radio" id="form_smooth" checked="checked" />
+											<label for="form_smooth">Smooth</label>
+										</p>
+									</form>
+								</div>
+							</div>
+							<div class="divider"></div>
+							<h5>COLOR</h5>
+							<div class="row">
+								<div class="input-field col s11" style="margin-top:0;">
+									<form action="#">
+										<div class="file-field input-field" style="margin-top:0;">
+											<div class="btn">
+												<input id="file_color" type="file">
+												<span><i class="material-icons">perm_media</i></span>
+											</div>
+											<div class="file-path-wrapper">
+												<input class="file-path validate" type="text" placeholder="UPLOAD COLOR FILE">
+											</div>
+										</div>
+									</form>
+									<form action="#">
+										<p>
+											<input name="group2" type="radio" id="form_default" checked="checked" />
+											<label for="form_default">Default</label>
+										</p>
+										<p>
+											<input name="group2" type="radio" id="form_continuous" />
+											<label for="form_continuous">Continuous</label>
+										</p>
+										<p>
+											<input name="group2" type="radio" id="form_discrete" />
+											<label for="form_discrete">Discrete</label>
+										</p>
+									</form>
+									<p>
+										<a class="btn waves-effect waves-light modal-trigger" href="#edit_color_modal" onclick="onColorEditClick();">
+										Edit Color
+										</a>
+										<div id="edit_color_modal" class="modal modal-fixed-footer">
+											<div class="modal-content" style="overflow-x:auto;">
+												<h4>COLOR EDIT</h4>
+												<div class="row">
+													<div class="col s12 m6">
+														<h6>Solid Color</h6>
+														<div class="input-field">
+															<input id="edit_solid" type="text"></input>
+														</div>
+														<h6>Continuous Color</h6>
+														<div class="input-field">
+															<textarea id="edit_continuous" class="materialize-textarea" wrap="off"></textarea>
+														</div>
+														<h6>Discrete Color</h6>
+														<div class="input-field">
+															<textarea id="edit_discrete" class="materialize-textarea" wrap="off"></textarea>
+														</div>
+													</div>
+													<div class="col s12 m6">
+														<h5>使用说明</h5>
+														<p>在这里可以进行颜色映射的编辑，有单色、连续颜色、离散颜色三种模式。 需要
+															<b>严格按照</b>默认给出的格式进行编辑，如果运行出错，可刷新页面恢复默认颜色映射。</p>
+														<p><b>单色</b>模式的格式为
+															<green>[R, G, B]</green>，三个颜色通道的取值范围为[0, 255]的整数。</p>
+														<p><b>连续颜色</b>模式中，每行的格式为
+															<green>[position, [R, G, B]]</green>，其中，position是取值为[0, 1]的实数，表示后面的颜色被固定在这个位置，以进行颜色插值。</p>
+														<p><b>离散颜色</b>模式中，每行为一个颜色，格式为
+															<green>[R, G, B]</green>。</p>
+														<p>编辑好颜色后点击确定，可以在右侧的颜色条上预览。注意，对于后两个模式，较前的行被映射于较低的颜色值，对应于颜色条的下端。</p>
+														<p>不要随意尝试奇怪的格式，因为我也不知道会发生什么(´Д｀。)</p>
+													</div>
+												</div>
+											</div>
+											<div class="modal-footer">
+												<a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Cancel</a>
+												<a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat" onclick="confirmColorEdit();">Confirm</a>
+											</div>
+										</div>
+									</p>
+								</div>
+								<div class="col s1" style="padding:0;">
+									<canvas id="colormap" class="z-depth-1" width="1px" height="229px"></canvas>
+								</div>
+							</div>
+							<div class="divider"></div>
+							<h5>FIND</h5>
+							<div class="row no-bottom">
+								<div class="col s10">
+									<div class="">
+										<input id="find_vv" type="text" placeholder="Find adjcent vertices using vertex ID."></input>
+									</div>
+								</div>
+								<div class="col s2">
+									<a class="btn btn-thin waves-effect waves-light" onclick="findVV();">
+									Find
+									</a>
+								</div>
+							</div>
+							<div class="row no-bottom">
+								<div class="col s10">
+									<div class="">
+										<input id="find_vf" type="text" placeholder="Find adjcent faces using vertex ID."></input>
+									</div>
+								</div>
+								<div class="col s2">
+									<a class="btn btn-thin waves-effect waves-light" onclick="findVF();">
+									Find
+									</a>
+								</div>
+							</div>
+							<div class="row no-bottom">
+								<div class="col s10">
+									<div class="">
+										<input id="find_ff" type="text" placeholder="Find adjcent faces using face ID."></input>
+									</div>
+								</div>
+								<div class="col s2">
+									<a class="btn btn-thin waves-effect waves-light" onclick="findFF();">
+									Find
+									</a>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col s12">
+									<a class="btn waves-effect waves-light" onclick="clearMarks();">
+									Clear Marks
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<script type="text/javascript" src="js/jquery-2.1.3.min.js"></script>
+	<script type="text/javascript" src="js/materialize.min.js"></script>
+	<script type="text/javascript" src="js/three.min.js"></script>
+	<script type="text/javascript" src="js/Detector.js"></script>
+	<script type="text/javascript" src="js/OrbitControls.js"></script>
+	<script type="text/javascript" src="js/ColorParser.js"></script>
+	<script type="text/javascript" src="js/ObjParser.js"></script>
+	<script type="text/javascript" src="js/OffParser.js"></script>
+	<script type="text/javascript" src="js/main.js"></script>
+	<script type="text/javascript" src="js/algorithm.js"></script>
+	<script type="text/javascript" src="js/Edge.js"></script>
+	<script type="text/javascript" src="js/color.js"></script>
+	<script type="text/javascript" src="js/Colormap.js"></script>
+	<!-- <script type="text/javascript" src="js/math/Lut.js"></script> -->
+
+	<script>
+		var file_type;
+		var container;
+		var camera, cameraTarget, scene, renderer, controls, meshContainer, spheres, triangles;
+		var colormap, colors;
+		$(document).ready(function() {
+			if (!Detector.webgl) Detector.addGetWebGLMessage();
+			$('.modal-trigger').leanModal();
+			$('#file_path')[0].onchange = function(e) {
+				uploadFile(e, 'model');
+			}
+			$('#file_color')[0].onchange = function(e) {
+				uploadFile(e, 'color');
+			}
+			$('#form_flat').click(function() {
+				if ($('#form_flat')[0].checked) {
+					showFlatMesh();
+				}
+			});
+			$('#form_smooth').click(function() {
+				if ($('#form_smooth')[0].checked) {
+					showSmoothMesh();
+				}
+			});
+			$('#form_wireframe').click(function() {
+				if ($('#form_wireframe')[0].checked) {
+					showWireframe();
+				} else {
+					hideWireframe();
+				}
+			});
+			$('#form_mesh').click(function() {
+				if ($('#form_mesh')[0].checked) {
+					showModelMesh();
+				} else {
+					hideModelMesh();
+				}
+			});
+			$('#form_default').click(function() {
+				if ($('#form_default')[0].checked) {
+					cm.type = 'solid';
+					updateColormap(cm);
+					updateColor();
+				}
+			});
+			$('#form_continuous').click(function() {
+				if ($('#form_continuous')[0].checked) {
+					cm.type = 'continuous';
+					updateColormap(cm);
+					updateColor();
+				}
+			});
+			$('#form_discrete').click(function() {
+				if ($('#form_discrete')[0].checked) {
+					cm.type = 'discrete';
+					updateColormap(cm);
+					updateColor();
+				}
+			});
+			init();
+			animate();
+		});
+	</script>
+
+</body>
+
+</html>
