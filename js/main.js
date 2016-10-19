@@ -1,3 +1,7 @@
+/**
+ * @author Zhou Bowei
+ */
+
 var init = function() {
     container = document.createElement('div');
     $('#viewer').append(container);
@@ -49,6 +53,7 @@ var init = function() {
     controls.enableDamping = true;
     controls.dampingFactor = 1;
     controls.enableZoom = true;
+    controls.zoomSpeed = 0.2;
     controls.minDistance = 1.5;
     controls.maxDistance = 7;
     controls.maxPolarAngle = Math.PI * 0.5;
@@ -278,11 +283,16 @@ var generateTriangle = function(a, b, c, colorHex) {
     var triangleGeometry = new THREE.Geometry();
     triangleGeometry.vertices.push(a, b, c);
     triangleGeometry.faces.push(new THREE.Face3(0, 1, 2));
-    var triangleMaterial = new THREE.MeshBasicMaterial({
+    var triangleMaterial = new THREE.MeshPhongMaterial({
         color: colorHex,
-        shading: THREE.FlatShading
+        specular: 0x666666,
+        shininess: 10,
+        shading: THREE.FlatShading,
+        side: THREE.DoubleSide
     });
     var triangle = new THREE.Mesh(triangleGeometry, triangleMaterial);
+    triangle.castShadow = true;
+    triangle.receiveShadow = true;
     // triangle.position.set(x, y, z);
     return triangle;
 }
@@ -456,4 +466,45 @@ var findVF = function() {
 var findFF = function() {
     var id = parseInt($('#find_ff').val());
     findFaceAdjcentFace(id);
+}
+
+var drawFaces = function() {
+    var mesh = meshContainer.children[0];
+    if (mesh == undefined) {
+        return;
+    }
+    var twoVmode = $('#form_two_vertices')[0].checked;
+    showWireframe();
+    showSolidColor();
+
+    spheres.children = [];
+    triangles.children = [];
+
+    var g = mesh.geometry;
+    var str = $('#form_draw_faces').val();
+    var vids = str.split(/[ /;,]+/);
+
+    for (var i = 0; i < vids.length; i++) {
+        vids[i] = parseInt(vids[i]);
+    }
+    var fids = findVerticesAdjcentFaces(vids, twoVmode);
+
+    for (var i = 0; i < fids.length; i++) {
+        var f = g.faces[fids[i]];
+        // console.log(f);
+        var triangle = generateTriangle(g.vertices[f.a], g.vertices[f.b], g.vertices[f.c], 0xffff00);
+        triangles.add(triangle);
+    }
+    animate();
+}
+
+var drawNormals = function() {
+    var mesh = meshContainer.children[0];
+    if (mesh == undefined) {
+        return;
+    }
+    var twoVmode = $('#form_two_vertices')[0].checked;
+    spheres.children = [];
+    triangles.children = [];
+
 }

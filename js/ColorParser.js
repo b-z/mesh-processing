@@ -1,3 +1,7 @@
+/**
+ * @author Zhou Bowei
+ */
+
 var ColorParser = function() {
 
 }

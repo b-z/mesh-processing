@@ -62,6 +62,10 @@
 		.no-bottom {
 			margin-bottom: 0;
 		}
+
+		.no-top {
+			margin-top: 0;
+		}
 	</style>
 </head>
 
@@ -238,6 +242,48 @@
 								<div class="col s12">
 									<a class="btn waves-effect waves-light" onclick="clearMarks();">
 									Clear Marks
+									</a>
+								</div>
+							</div>
+							<div class="divider"></div>
+							<h5>DRAW</h5>
+							<div class="row no-bottom">
+								<div class="col s10">
+									<p class="no-top">Input some vertex IDs, to find faces that have two or three vertices in the vertex list. Use
+										<green>space</green>,
+										<green>comma</green>,
+										<green>semicolon</green>, or
+										<green>slash</green> as separators.
+									</p>
+									<p>
+										<input type="checkbox" id="form_two_vertices" />
+										<label for="form_two_vertices">2 vertices mode</label>
+									</p>
+									<div class="">
+										<input id="form_draw_faces" type="text" placeholder="example: 2, 3 ///5; 7 , 11,;,;13.00e+0"></input>
+									</div>
+								</div>
+								<div class="col s2">
+									<a class="btn btn-thin waves-effect waves-light" onclick="drawFaces();">
+									Draw
+									</a>
+								</div>
+							</div>
+							<div class="row no-bottom">
+								<div class="col s10">
+									<p class="no-top">Input some face IDs, to draw their normals. Use
+										<green>space</green>,
+										<green>comma</green>,
+										<green>semicolon</green>, or
+										<green>slash</green> as separators. <b>Leave blank to draw all the normals</b>.
+									</p>
+									<div class="">
+										<input id="form_draw_faces" type="text" placeholder="example: 2, 3 ///5; 7 , 11,;,;13.00e+0"></input>
+									</div>
+								</div>
+								<div class="col s2">
+									<a class="btn btn-thin waves-effect waves-light" onclick="drawNormals();">
+									Draw
 									</a>
 								</div>
 							</div>

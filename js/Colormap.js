@@ -1,3 +1,7 @@
+/**
+ * @author Zhou Bowei
+ */
+
 var Colormap = function() {
     this.mesh = null;
     this.min = 0;

@@ -1,3 +1,7 @@
+/**
+ * @author Zhou Bowei
+ */
+
 var OffParser = function() {
 
 }
@@ -87,12 +91,13 @@ OffParser.prototype = {
             // emissive: 0xff0000,
             shininess: 10,
             shading: THREE.SmoothShading,
-            opacity: 0.9,
-            transparent: true,
+            // opacity: 0.9,
+            // transparent: true,
             vertexColors: THREE.FaceColors,
             polygonOffset: true,
             polygonOffsetFactor: 1,
-            polygonOffsetUnits: 1
+            polygonOffsetUnits: 1,
+            side: THREE.DoubleSide
         });
         material.name = object.material.name;
         var mesh = new THREE.Mesh(buffergeometry, material);

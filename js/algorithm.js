@@ -1,3 +1,7 @@
+/**
+ * @author Zhou Bowei
+ */
+
 var optimizeMesh = function(mesh) {
     mesh.castShadow = true;
     mesh.receiveShadow = true;
@@ -91,9 +95,9 @@ var addDataStructure = function(mesh) {
     for (var i = 0; i < g.edges.length; i++) {
         var f0 = g.edges[i].facesIdx[0];
         var f1 = g.edges[i].facesIdx[1];
-		if (f0 == undefined || f1 == undefined) {
-			continue;
-		}
+        if (f0 == undefined || f1 == undefined) {
+            continue;
+        }
         g.faces[f0].facesIdx.push(f1);
         g.faces[f1].facesIdx.push(f0);
     }
@@ -108,7 +112,7 @@ var findVertexAdjcentVertex = function(vertexIdx) {
     var g = mesh.geometry;
     var dstIdxs = g.vertices[vertexIdx].neighborsIdx;
     showVertexAdjcentVertex(vertexIdx, dstIdxs);
-	console.log(dstIdxs);
+    console.log(dstIdxs);
     return dstIdxs;
 }
 
@@ -120,7 +124,7 @@ var findVertexAdjcentFace = function(vertexIdx) {
     var g = mesh.geometry;
     var dstIdxs = g.vertices[vertexIdx].facesIdx;
     showVertexAdjcentFace(vertexIdx, dstIdxs);
-	console.log(dstIdxs);
+    console.log(dstIdxs);
     return dstIdxs;
 }
 
@@ -132,7 +136,45 @@ var findFaceAdjcentFace = function(faceIdx) {
     var g = mesh.geometry;
     var dstIdxs = g.faces[faceIdx].facesIdx;
     showFaceAdjcentFace(faceIdx, dstIdxs);
-	console.log(dstIdxs);
+    console.log(dstIdxs);
+    return dstIdxs;
+}
+
+var findVerticesAdjcentFaces = function(verticesIdx, twoVmode) {
+    var mesh = meshContainer.children[0];
+    if (mesh == undefined) {
+        return;
+    }
+    var g = mesh.geometry;
+    var vdict = {};
+    var fdict = {};
+    for (var i = 0; i < verticesIdx.length; i++) {
+        vdict['' + verticesIdx[i]] = true;
+    }
+    for (var i = 0; i < verticesIdx.length; i++) {
+        var v = verticesIdx[i];
+        var fs = g.vertices[v].facesIdx;
+        for (var j = 0; j < fs.length; j++) {
+            fdict['' + fs[j]] = true;
+        }
+    }
+    var dstIdxs = [];
+    var mode = twoVmode ? 2 : 3;
+    for (var i = 0; i < g.faces.length; i++) {
+        if (fdict['' + i]) {
+            var sum = 0;
+            for (var j = 0; j < 3; j++) {
+                var v = g.faces[i]['abc' [j]];
+                if (vdict[v]) {
+                    sum++;
+                }
+            }
+            if (sum >= mode) {
+                dstIdxs.push(i);
+            }
+        }
+    }
+    console.log(vdict, fdict, dstIdxs);
     return dstIdxs;
 }
 
