@@ -175,11 +175,11 @@ var updateColormap = function(cm) {
 }
 
 var updateInfo = function(mesh) {
-    var txt = '<h5>INFO</h5>';
+    var txt = ''; //'<h5>INFO</h5>';
     txt += '<p>There are total <b><green>' + mesh.geometry.vertices.length + '</green></b> vertices and <b><green>';
     txt += mesh.geometry.edges.length + '</green></b> edges and <b><green>';
     txt += mesh.geometry.faces.length + '</green></b> faces.</p>';
-    txt += '<div class="divider"></div>';
+    // txt += '<div class="divider"></div>';
 
     $('#mesh_info').html(txt);
 }
@@ -321,6 +321,8 @@ var showVertexAdjcentVertex = function(vertexIdx, dstIdxs) {
         var v_ = g.vertices[dstIdxs[i]];
         spheres.add(generateSphere(v_.x, v_.y, v_.z, r / 2, 0xffff00));
     }
+    Materialize.toast(dstIdxs.length+' vertices found(´Д｀；)',3000);
+
     animate();
 }
 
@@ -352,6 +354,8 @@ var showVertexAdjcentFace = function(vertexIdx, dstIdxs) {
         var triangle = generateTriangle(g.vertices[f.a], g.vertices[f.b], g.vertices[f.c], 0xffff00);
         triangles.add(triangle);
     }
+    Materialize.toast(dstIdxs.length+' faces found(´Д｀；)',3000);
+
     animate();
 }
 
@@ -374,6 +378,8 @@ var showFaceAdjcentFace = function(faceIdx, dstIdxs) {
         var triangle = generateTriangle(g.vertices[f.a], g.vertices[f.b], g.vertices[f.c], 0x3fb79d);
         triangles.add(triangle);
     }
+    Materialize.toast(dstIdxs.length+' faces found(´Д｀；)',3000);
+
     animate();
 }
 
@@ -482,10 +488,12 @@ var drawFaces = function() {
 
     var g = mesh.geometry;
     var str = $('#form_draw_faces').val();
-    var vids = str.split(/[ /;,]+/);
-
+    var tmp = str.split(/[ /;,]+/);
+    var vids = [];
     for (var i = 0; i < vids.length; i++) {
-        vids[i] = parseInt(vids[i]);
+        if (tmp[i] != '') {
+            vids.push(parseInt(tmp[i]));
+        }
     }
     var fids = findVerticesAdjcentFaces(vids, twoVmode);
 
@@ -495,6 +503,7 @@ var drawFaces = function() {
         var triangle = generateTriangle(g.vertices[f.a], g.vertices[f.b], g.vertices[f.c], 0xffff00);
         triangles.add(triangle);
     }
+    Materialize.toast(fids.length+' faces found(´Д｀；)',3000);
     animate();
 }
 
@@ -503,8 +512,47 @@ var drawNormals = function() {
     if (mesh == undefined) {
         return;
     }
-    var twoVmode = $('#form_two_vertices')[0].checked;
+    var g = mesh.geometry;
+
+    var str = $('#form_draw_normals').val();
+    var fids = [];
+    if (str == '') {
+        for (var i = 0; i < g.faces.length; i++) {
+            fids.push(i);
+        }
+    } else {
+        tmp = str.split(/[ /;,]+/);
+        for (var i = 0; i < fids.length; i++) {
+            if (tmp[i] != '') {
+                fids.push(parseInt(tmp[i]));
+            }
+        }
+    }
     spheres.children = [];
     triangles.children = [];
 
+    for (var i = 0; i < fids.length; i++) {
+        var f = g.faces[fids[i]];
+        var triangle = generateTriangle(g.vertices[f.a], g.vertices[f.b], g.vertices[f.c], 0xffff00);
+        // triangles.add(triangle);
+        triangle.geometry.computeFaceNormals();
+        var normal = new THREE.FaceNormalsHelper(triangle, 0.5, 0x00ff00, 1);
+        triangles.add(normal);
+    }
+
+    animate();
+}
+
+var generateNoiseUser = function() {
+    var mesh = meshContainer.children[0];
+    if (mesh == undefined) {
+        return;
+    }
+    var sigma = $('#form_noise_sigma').val();
+    if (sigma==''){
+        sigma = 1;
+    } else {
+        sigma = parseFloat(sigma);
+    }
+    generateModelNoise(mesh, sigma);
 }
