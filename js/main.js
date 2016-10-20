@@ -66,6 +66,9 @@ var init = function() {
     meshContainer = new THREE.Object3D();
     scene.add(meshContainer);
 
+    noiseMeshContainer = new THREE.Object3D();
+    scene.add(noiseMeshContainer);
+
     spheres = new THREE.Object3D();
     scene.add(spheres);
 
@@ -126,6 +129,7 @@ var showMesh = function(mesh) {
     meshContainer.add(mesh);
     spheres.children = [];
     triangles.children = [];
+    noiseMeshContainer.children = [];
     var wire = new THREE.EdgesHelper(mesh, 0xffffff); // or THREE.WireframeHelper
     wire.material.linewidth = 1;
     wire.castShadow = true;
@@ -297,7 +301,7 @@ var generateTriangle = function(a, b, c, colorHex) {
     return triangle;
 }
 
-var showVertexAdjcentVertex = function(vertexIdx, dstIdxs) {
+var showVertexAdjacentVertex = function(vertexIdx, dstIdxs) {
     var mesh = meshContainer.children[0];
     if (mesh == undefined) {
         return;
@@ -306,6 +310,7 @@ var showVertexAdjcentVertex = function(vertexIdx, dstIdxs) {
     showSolidColor();
     spheres.children = [];
     triangles.children = [];
+    noiseMeshContainer.children = [];
     var g = mesh.geometry;
     var v = g.vertices[vertexIdx];
     var r = 0;
@@ -321,12 +326,12 @@ var showVertexAdjcentVertex = function(vertexIdx, dstIdxs) {
         var v_ = g.vertices[dstIdxs[i]];
         spheres.add(generateSphere(v_.x, v_.y, v_.z, r / 2, 0xffff00));
     }
-    Materialize.toast(dstIdxs.length+' vertices found(´Д｀；)',3000);
+    Materialize.toast(dstIdxs.length + ' vertices found(´Д｀；)', 3000);
 
     animate();
 }
 
-var showVertexAdjcentFace = function(vertexIdx, dstIdxs) {
+var showVertexAdjacentFace = function(vertexIdx, dstIdxs) {
     var mesh = meshContainer.children[0];
     if (mesh == undefined) {
         return;
@@ -336,6 +341,8 @@ var showVertexAdjcentFace = function(vertexIdx, dstIdxs) {
 
     spheres.children = [];
     triangles.children = [];
+    noiseMeshContainer.children = [];
+
 
     var g = mesh.geometry;
     var v = g.vertices[vertexIdx];
@@ -354,12 +361,12 @@ var showVertexAdjcentFace = function(vertexIdx, dstIdxs) {
         var triangle = generateTriangle(g.vertices[f.a], g.vertices[f.b], g.vertices[f.c], 0xffff00);
         triangles.add(triangle);
     }
-    Materialize.toast(dstIdxs.length+' faces found(´Д｀；)',3000);
+    Materialize.toast(dstIdxs.length + ' faces found(´Д｀；)', 3000);
 
     animate();
 }
 
-var showFaceAdjcentFace = function(faceIdx, dstIdxs) {
+var showFaceAdjacentFace = function(faceIdx, dstIdxs) {
     var mesh = meshContainer.children[0];
     if (mesh == undefined) {
         return;
@@ -369,6 +376,7 @@ var showFaceAdjcentFace = function(faceIdx, dstIdxs) {
 
     spheres.children = [];
     triangles.children = [];
+    noiseMeshContainer.children = [];
 
     var g = mesh.geometry;
     var f0 = g.faces[faceIdx];
@@ -378,7 +386,7 @@ var showFaceAdjcentFace = function(faceIdx, dstIdxs) {
         var triangle = generateTriangle(g.vertices[f.a], g.vertices[f.b], g.vertices[f.c], 0x3fb79d);
         triangles.add(triangle);
     }
-    Materialize.toast(dstIdxs.length+' faces found(´Д｀；)',3000);
+    Materialize.toast(dstIdxs.length + ' faces found(´Д｀；)', 3000);
 
     animate();
 }
@@ -386,8 +394,11 @@ var showFaceAdjcentFace = function(faceIdx, dstIdxs) {
 var clearMarks = function() {
     spheres.children = [];
     triangles.children = [];
+    noiseMeshContainer.children = [];
+
     animate();
 }
+
 
 var uploadFile = function(e, type) {
     var file = e.target.files[0];
@@ -461,17 +472,17 @@ var confirmColorEdit = function() {
 
 var findVV = function() {
     var id = parseInt($('#find_vv').val());
-    findVertexAdjcentVertex(id);
+    findVertexAdjacentVertex(id);
 }
 
 var findVF = function() {
     var id = parseInt($('#find_vf').val());
-    findVertexAdjcentFace(id);
+    findVertexAdjacentFace(id);
 }
 
 var findFF = function() {
     var id = parseInt($('#find_ff').val());
-    findFaceAdjcentFace(id);
+    findFaceAdjacentFace(id);
 }
 
 var drawFaces = function() {
@@ -485,17 +496,19 @@ var drawFaces = function() {
 
     spheres.children = [];
     triangles.children = [];
+    noiseMeshContainer.children = [];
 
     var g = mesh.geometry;
     var str = $('#form_draw_faces').val();
     var tmp = str.split(/[ /;,]+/);
     var vids = [];
-    for (var i = 0; i < vids.length; i++) {
+    for (var i = 0; i < tmp.length; i++) {
         if (tmp[i] != '') {
             vids.push(parseInt(tmp[i]));
         }
     }
-    var fids = findVerticesAdjcentFaces(vids, twoVmode);
+    console.log(vids);
+    var fids = findVerticesAdjacentFaces(vids, twoVmode);
 
     for (var i = 0; i < fids.length; i++) {
         var f = g.faces[fids[i]];
@@ -503,7 +516,7 @@ var drawFaces = function() {
         var triangle = generateTriangle(g.vertices[f.a], g.vertices[f.b], g.vertices[f.c], 0xffff00);
         triangles.add(triangle);
     }
-    Materialize.toast(fids.length+' faces found(´Д｀；)',3000);
+    Materialize.toast(fids.length + ' faces found(´Д｀；)', 3000);
     animate();
 }
 
@@ -522,7 +535,7 @@ var drawNormals = function() {
         }
     } else {
         tmp = str.split(/[ /;,]+/);
-        for (var i = 0; i < fids.length; i++) {
+        for (var i = 0; i < tmp.length; i++) {
             if (tmp[i] != '') {
                 fids.push(parseInt(tmp[i]));
             }
@@ -549,10 +562,15 @@ var generateNoiseUser = function() {
         return;
     }
     var sigma = $('#form_noise_sigma').val();
-    if (sigma==''){
+    if (sigma == '') {
         sigma = 1;
+        $('#form_noise_sigma').val(sigma)
     } else {
         sigma = parseFloat(sigma);
     }
-    generateModelNoise(mesh, sigma);
+    $('#form_filter_sigma').val(2 * sigma);
+    var noiseMesh = generateModelNoise(mesh, sigma);
+    noiseMeshContainer.children = [];
+    noiseMeshContainer.add(noiseMesh);
+    animate();
 }

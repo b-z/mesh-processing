@@ -73,6 +73,10 @@
 			margin-top: 0!important;
 		}
 
+		.no-padding {
+			padding: 0!important;
+		}
+
 		.container .row {
 			margin-left: 0;
 			margin-right: 0;
@@ -108,29 +112,30 @@
 				<div class="card-panel" style="padding:0;line-height:0;position:relative;">
 					<div id="viewer"></div>
 				</div>
+
 			</div>
 			<!-- right panel -->
 			<div class="col s12 m12 l4">
+				<div id="file_loader" class="row no-bottom">
+					<div class="col s12">
+						<form action="#">
+							<div class="file-field input-field">
+								<div class="btn btn-mid-thin">
+									<input id="file_path" type="file">
+									<span><i class="material-icons">perm_media</i></span>
+								</div>
+								<div class="file-path-wrapper">
+									<input class="file-path validate" type="text" placeholder="UPLOAD (*.off | *.obj) MODEL FILE">
+								</div>
+
+							</div>
+						</form>
+					</div>
+				</div>
 				<ul class="collapsible" data-collapsible="expandable">
 					<li>
-						<div class="collapsible-header active">INFO</div>
+						<div class="collapsible-header">INFO</div>
 						<div id="" class="row collapsible-body">
-							<div id="file_loader" class="row no-bottom">
-								<div class="col s12">
-									<form action="#">
-										<div class="file-field input-field">
-											<div class="btn btn-mid-thin">
-												<input id="file_path" type="file">
-												<span><i class="material-icons">perm_media</i></span>
-											</div>
-											<div class="file-path-wrapper">
-												<input class="file-path validate" type="text" placeholder="UPLOAD (*.off | *.obj) MODEL FILE">
-											</div>
-
-										</div>
-									</form>
-								</div>
-							</div>
 							<div class="col s10 m6 l12">
 								<div id="mesh_info" class=""></div>
 							</div>
@@ -139,28 +144,48 @@
 					<li>
 						<div class="collapsible-header active">VIEW</div>
 						<div id="" class="row collapsible-body">
-							<div class="col s10 m6 l12">
-								<div class="row">
-									<div class="input-field col s12 no-top">
+							<div class="col s12 m6 l12">
+								<div class="row no-bottom">
+									<div class="input-field col s12 no-top no-padding">
 										<!-- <h5>VIEW</h5> -->
 										<form action="#">
-											<p>
-												<input type="checkbox" id="form_wireframe" />
-												<label for="form_wireframe">Wireframe</label>
-											</p>
-											<p>
-												<input type="checkbox" id="form_mesh" checked="checked" />
-												<label for="form_mesh">Mesh</label>
-											</p>
-											<p>
-												<input name="group1" type="radio" id="form_flat" />
-												<label for="form_flat">Flat</label>
-											</p>
-											<p>
-												<input name="group1" type="radio" id="form_smooth" checked="checked" />
-												<label for="form_smooth">Smooth</label>
-											</p>
+											<div class="row no-bottom">
+												<div class="col s6">
+													<p>
+														<input type="checkbox" id="form_wireframe" />
+														<label for="form_wireframe">Wireframe</label>
+													</p>
+												</div>
+												<div class="col s6">
+													<p>
+														<input type="checkbox" id="form_mesh" checked="checked" />
+														<label for="form_mesh">Mesh</label>
+													</p>
+												</div>
+											</div>
+											<div class="row">
+												<div class="col s6">
+
+													<p>
+														<input name="group1" type="radio" id="form_flat" />
+														<label for="form_flat">Flat</label>
+													</p>
+												</div>
+												<div class="col s6">
+													<p>
+														<input name="group1" type="radio" id="form_smooth" checked="checked" />
+														<label for="form_smooth">Smooth</label>
+													</p>
+												</div>
+											</div>
 										</form>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col s12 center">
+										<a class="btn waves-effect waves-light" onclick="clearMarks();">
+										Clear Marks
+										</a>
 									</div>
 								</div>
 							</div>
@@ -259,7 +284,7 @@
 								<div class="row no-bottom">
 									<div class="col s10">
 										<div class="">
-											<input id="find_vv" type="text" placeholder="Find adjcent vertices using vertex ID."></input>
+											<input id="find_vv" type="text" placeholder="Find adjacent vertices using vertex ID."></input>
 										</div>
 									</div>
 									<div class="col s2">
@@ -271,7 +296,7 @@
 								<div class="row no-bottom">
 									<div class="col s10">
 										<div class="">
-											<input id="find_vf" type="text" placeholder="Find adjcent faces using vertex ID."></input>
+											<input id="find_vf" type="text" placeholder="Find adjacent faces using vertex ID."></input>
 										</div>
 									</div>
 									<div class="col s2">
@@ -283,19 +308,12 @@
 								<div class="row no-bottom">
 									<div class="col s10">
 										<div class="">
-											<input id="find_ff" type="text" placeholder="Find adjcent faces using face ID."></input>
+											<input id="find_ff" type="text" placeholder="Find adjacent faces using face ID."></input>
 										</div>
 									</div>
 									<div class="col s2">
 										<a class="btn btn-thin waves-effect waves-light" onclick="findFF();">
 										Find
-										</a>
-									</div>
-								</div>
-								<div class="row">
-									<div class="col s12">
-										<a class="btn waves-effect waves-light" onclick="clearMarks();">
-										Clear Marks
 										</a>
 									</div>
 								</div>
@@ -367,22 +385,35 @@
 										</a>
 									</div>
 								</div>
-								<!-- <div class="row no-bottom">
-									<div class="col s10">
+								<div class="row no-bottom">
+									<div class="col s8">
 										<div class="">
-											<input id="form_draw_normals" type="text" placeholder="example: 2, 3 ///5; 7 , 11,;,;13.00e+0"></input>
+											<input id="form_filter_sigma" type="text" placeholder="Gaussian Filter Sigma"></input>
 										</div>
 									</div>
-									<div class="col s2">
-										<a class="btn btn-thin waves-effect waves-light" onclick="drawNormals();">
-										Draw
+									<div class="col s4">
+										<a class="btn btn-thin waves-effect waves-light" onclick="filterNoiseUser();">
+										Filter
 										</a>
 									</div>
-								</div> -->
+								</div>
+								<p>
+									<input type="checkbox" id="form_show_mesh" checked="checked" />
+									<label for="form_show_mesh">Mesh</label>
+								</p>
+								<p>
+									<input type="checkbox" id="form_show_noise" />
+									<label for="form_show_noise">Noised Mesh</label>
+								</p>
+								<p>
+									<input type="checkbox" id="form_show_filtered_noise" />
+									<label for="form_show_filtered_noise">Filtered Noised Mesh</label>
+								</p>
 							</div>
 						</div>
 					</li>
 				</ul>
+
 				<!-- <div class="card-panel" style="position:relative;">
 
 				</div> -->
@@ -408,7 +439,7 @@
 	<script>
 		var file_type;
 		var container;
-		var camera, cameraTarget, scene, renderer, controls, meshContainer, spheres, triangles;
+		var camera, cameraTarget, scene, renderer, controls, meshContainer, noiseMeshContainer, spheres, triangles;
 		var colormap, colors;
 		$(document).ready(function() {
 			if (!Detector.webgl) Detector.addGetWebGLMessage();
