@@ -261,7 +261,7 @@ var generateModelNoise = function(mesh, sigma) {
     g.verticesNeedUpdate = true;
     var c = cm.color.solid;
     var material = new THREE.MeshPhongMaterial({
-        color: 0xffffff,
+        color: 0x0000ff,
         specular: 0x666666,
         shininess: 10,
         shading: THREE.FlatShading,
@@ -434,7 +434,78 @@ var gaussianBlur = function(mesh, sigma) {
 }
 
 var compareMesh = function(mesh1, mesh2) {
+    // mesh1: basic
+    var g1 = mesh1.geometry;
+    var g2 = mesh2.geometry;
+    var g = mesh1.geometry.clone();
+    var maxd = 0;
 
+    for (var i = 0; i < g1.faces.length; i++) {
+        for (var j = 0; j < 3; j++) {
+            var vidx = g1.faces[i]['abc' [j]];
+            var vnormal = g1.faces[i].vertexNormals[j];
+            g1.vertices[vidx].normal = vnormal;
+        }
+    }
+    for (var i = 0; i < g.vertices.length; i++) {
+        // var d = g1.vertices[i].distanceTo(g2.vertices[i]);
+        var vp = vertexTangentPlane(g1.vertices[i], g1.vertices[i].normal);
+        var d = vp.distanceToPoint(g2.vertices[i]);
+        g.vertices[i].d = d;
+        if (Math.abs(d) > maxd) {
+            maxd = Math.abs(d);
+        }
+    }
+    if (!maxd) {
+        maxd = 0.000001;
+    }
+    var cm_ = new Colormap();
+    cm_.type = 'continuous';
+    // cm_.color.continuous = [
+    //     [0, [0, 0, 128]],
+    //     [0.2, [0, 0, 255]],
+    //     [0.45, [50, 255, 255]],
+    //     [0.5, [128, 255, 128]],
+    //     [0.55, [255, 255, 50]],
+    //     [0.8, [255, 0, 0]],
+    //     [1, [128, 0, 0]]
+    // ];
+    cm_.color.continuous = [
+        [0, [0, 0, 128]],
+        [0.15, [0, 0, 255]],
+        [0.382, [50, 255, 255]],
+        [0.5, [128, 255, 128]],
+        [0.618, [255, 255, 50]],
+        [0.85, [255, 0, 0]],
+        [1, [128, 0, 0]]
+    ];
+    updateColormap(cm_, $('#colormap2'));
+    cm_.min = -maxd;
+    cm_.max = maxd;
+    for (var i = 0; i < g.faces.length; i++) {
+        var f = g.faces[i];
+        f.vertexColors = [];
+        for (var j = 0; j < 3; j++) {
+            var idx = f['abc' [j]];
+            var d = g.vertices[idx].d;
+            d = Math.pow(Math.abs(d / maxd), 1 / 2) * maxd * (d > 0 ? 1 : -1);
+            var color = new THREE.Color();
+            var c = cm_.lookupColor(d);
+            // console.log(cm_.min,cm_.max,d,c);
+            color.setRGB(c[0] / 255, c[1] / 255, c[2] / 255);
+            f.vertexColors.push(color);
+        }
+    }
+    var material = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+        // specular: 0x666666,
+        // shininess: 0,
+        shading: THREE.SmoothShading,
+        vertexColors: THREE.VertexColors,
+        side: THREE.DoubleSide
+    });
+    var mesh = new THREE.Mesh(g, material);
+    return mesh;
 }
 
 var mse = function(mesh1, mesh2) {

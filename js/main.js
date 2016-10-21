@@ -167,10 +167,12 @@ var showMesh = function(mesh) {
     animate();
 }
 
-var updateColormap = function(cm) {
-    var $canv = $('#colormap');
-    var len = $canv.height();
-    var ctx = $canv[0].getContext('2d');
+var updateColormap = function(cm, $cm) {
+    if ($cm== undefined){
+        $cm = $('#colormap');
+    }
+    var len = $cm.height();
+    var ctx = $cm[0].getContext('2d');
     for (i = 0; i < len; i++) {
         var color = cm.lookupColor(1 - i / len, true); //colorInterpolation(1 - i / len, [51, 45, 138], [250, 250, 57]);
         ctx.fillStyle = 'rgb(' + color[0] + ',' + color[1] + ',' + color[2] + ')';
@@ -231,7 +233,8 @@ var showWireframe = function() {
 }
 
 var hideModelMesh = function() {
-    $('#form_mesh')[0].checked = false;
+    $('.form_mesh')[0].checked = false;
+    $('.form_mesh')[1].checked = false;
     var mesh = meshContainer.children[0];
     if (mesh == undefined) {
         return;
@@ -241,8 +244,53 @@ var hideModelMesh = function() {
 }
 
 var showModelMesh = function() {
-    $('#form_mesh')[0].checked = true;
+    $('.form_mesh')[0].checked = true;
+    $('.form_mesh')[1].checked = true;
     var mesh = meshContainer.children[0];
+    if (mesh == undefined) {
+        return;
+    }
+    mesh.visible = true;
+    animate();
+}
+
+var hideNoiseMesh = function() {
+    $('#form_show_noise')[0].checked = false;
+
+    var mesh = noiseMeshContainer.children[0];
+    if (mesh == undefined) {
+        return;
+    }
+    mesh.visible = false;
+    animate();
+}
+
+var showNoiseMesh = function() {
+    $('#form_show_noise')[0].checked = true;
+
+    var mesh = noiseMeshContainer.children[0];
+    if (mesh == undefined) {
+        return;
+    }
+    mesh.visible = true;
+    animate();
+}
+
+var hideFilteredMesh = function() {
+    $('#form_show_filtered_noise')[0].checked = false;
+
+    var mesh = noiseMeshContainer.children[1];
+    if (mesh == undefined) {
+        return;
+    }
+    mesh.visible = false;
+    animate();
+}
+
+var showFilteredMesh = function() {
+    $('#form_show_filtered_noise')[0].checked = true;
+
+    var mesh = noiseMeshContainer.children[1];
     if (mesh == undefined) {
         return;
     }
@@ -552,7 +600,7 @@ var drawNormals = function() {
         var normal = new THREE.FaceNormalsHelper(triangle, 0.5, 0x00ff00, 1);
         triangles.add(normal);
     }
-
+    Materialize.toast(fids.length + ' normals drew(´Д｀；)', 3000);
     animate();
 }
 
@@ -572,5 +620,57 @@ var generateNoiseUser = function() {
     var noiseMesh = generateModelNoise(mesh, sigma);
     noiseMeshContainer.children = [];
     noiseMeshContainer.add(noiseMesh);
+    $('#form_show_noise')[0].checked = true;
+    Materialize.toast('Noise generated(´Д｀；)', 3000);
+    animate();
+}
+
+var filterNoiseUser = function() {
+    var mesh = noiseMeshContainer.children[0];
+    if (mesh == undefined) {
+        return;
+    }
+    var sigma = $('#form_filter_sigma').val();
+    sigma = parseFloat(sigma);
+    var filteredMesh = gaussianBlur(mesh, sigma);
+    if (noiseMeshContainer.children.length == 1) {
+        noiseMeshContainer.add(filteredMesh);
+    } else {
+        noiseMeshContainer.children[1] = filteredMesh;
+    }
+    $('#form_show_filtered_noise')[0].checked = true;
+    var difference = compareMesh(meshContainer.children[0], filteredMesh);
+    if (noiseMeshContainer.children.length == 2) {
+        noiseMeshContainer.add(difference);
+    } else {
+        noiseMeshContainer.children[2] = difference;
+    }
+    hideDifference();
+    var MSE = mse(meshContainer.children[0], filteredMesh);
+    Materialize.toast('Filtered mesh generated(´Д｀；)', 3000);
+    Materialize.toast('MSE=' + MSE + '(´Д｀；)', 3000);
+    $('#mse').html('The MSE is <green>' + MSE + '</green>.');
+    hideNoiseMesh();
+    showDifference();
+    animate();
+}
+
+var showDifference = function() {
+    $('#form_show_difference')[0].checked = true;
+    var mesh = noiseMeshContainer.children[2];
+    if (mesh == undefined) {
+        return;
+    }
+    mesh.visible = true;
+    animate();
+}
+
+var hideDifference = function() {
+    $('#form_show_difference')[0].checked = false;
+    var mesh = noiseMeshContainer.children[2];
+    if (mesh == undefined) {
+        return;
+    }
+    mesh.visible = false;
     animate();
 }
